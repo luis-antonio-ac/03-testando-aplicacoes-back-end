@@ -1,5 +1,5 @@
 export default {
-  setupFiles: ["<rootdir>/jest.setup.js"],
+  setupFiles: ["<rootDir>/jest.setup.js"],
   moduleNameMapper: {
     "^controllers/(.*)$": "<rootdir>/src/controllers/$1",
     "^middlewares/(.*)$": "<rootdir>/src/middlewares/$1",
