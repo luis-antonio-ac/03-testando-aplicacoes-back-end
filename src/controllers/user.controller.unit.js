@@ -1,4 +1,4 @@
-import { list, create, update } from "./user.controller";
+import { list, create, update, remove } from "./user.controller";
 import { createAuth, createRequest, createResponse } from "utils/create";
 
 import findUser, { basedOnQuery } from "services/user/find";
@@ -12,6 +12,9 @@ jest.mock("services/user/create");
 
 import { updateUserByUid } from "services/user/update.js";
 jest.mock("services/user/update");
+
+import { removeUser } from "services/user/remove.js";
+jest.mock("services/user/remove");
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -125,6 +128,44 @@ describe("Controller: update", () => {
 
     expect(logger.error.mock.calls).toEqual([
       ["Ocorreu um erro ao atualizar usuário", new Error(500)],
+    ]);
+    expect(response.status.mock.calls).toEqual([[500]]);
+    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(response.json).toBeCalledWith({ message: "500" });
+  });
+});
+
+describe("Controller: remove", () => {
+  it("should remove the user", async () => {
+    const user = createAuth();
+    const request = createRequest({ body: { uid: user.uid } });
+    const response = createResponse();
+
+    removeUser.mockResolvedValueOnce(user);
+
+    await remove(request, response);
+
+    expect(removeUser.mock.calls).toEqual([[user.uid]]);
+
+    expect(response.status.mock.calls).toEqual([[202]]);
+
+    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(response.json).toBeCalledWith(user);
+  });
+
+  it("should throw 500", async () => {
+    const user = createAuth({ uid: "abc-123" });
+    const request = createRequest({ body: user });
+    const response = createResponse();
+
+    removeUser.mockRejectedValueOnce(new Error(500));
+
+    await remove(request, response);
+
+    expect(removeUser.mock.calls).toEqual([[user.uid]]);
+
+    expect(logger.error.mock.calls).toEqual([
+      ["Ocorreu um erro ao remover usuário", new Error(500)],
     ]);
     expect(response.status.mock.calls).toEqual([[500]]);
     expect(response.json).toHaveBeenCalledTimes(1);
