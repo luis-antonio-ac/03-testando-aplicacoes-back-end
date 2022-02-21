@@ -65,6 +65,8 @@ describe("Controller: create", () => {
 
     expect(createUser.mock.calls).toEqual([[user]]);
 
+    expect(response.status.mock.calls).toEqual([[201]]);
+
     expect(response.json).toHaveBeenCalledTimes(1);
     expect(response.json).toBeCalledWith(user);
   });
