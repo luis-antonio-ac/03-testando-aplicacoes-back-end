@@ -1,4 +1,4 @@
-import { list, create } from "./user.controller";
+import { list, create, update } from "./user.controller";
 import { createAuth, createRequest, createResponse } from "utils/create";
 
 import findUser, { basedOnQuery } from "services/user/find";
@@ -9,6 +9,9 @@ jest.mock("@jsassertivo/cli/src/utils/logger.js");
 
 import { createUser } from "services/user/create.js";
 jest.mock("services/user/create");
+
+import { updateUserByUid } from "services/user/update.js";
+jest.mock("services/user/update");
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -84,6 +87,44 @@ describe("Controller: create", () => {
 
     expect(logger.error.mock.calls).toEqual([
       ["Ocorreu um erro ao criar usuário", new Error(500)],
+    ]);
+    expect(response.status.mock.calls).toEqual([[500]]);
+    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(response.json).toBeCalledWith({ message: "500" });
+  });
+});
+
+describe("Controller: update", () => {
+  it("should update the user", async () => {
+    const user = createAuth();
+    const request = createRequest({ body: user });
+    const response = createResponse();
+
+    updateUserByUid.mockResolvedValueOnce(user);
+
+    await update(request, response);
+
+    expect(updateUserByUid.mock.calls).toEqual([[user]]);
+
+    expect(response.status.mock.calls).toEqual([[202]]);
+
+    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(response.json).toBeCalledWith(user);
+  });
+
+  it("should throw 500", async () => {
+    const user = createAuth({ uid: "abc-123" });
+    const request = createRequest({ body: user });
+    const response = createResponse();
+
+    updateUserByUid.mockRejectedValueOnce(new Error(500));
+
+    await update(request, response);
+
+    expect(updateUserByUid.mock.calls).toEqual([[user]]);
+
+    expect(logger.error.mock.calls).toEqual([
+      ["Ocorreu um erro ao atualizar usuário", new Error(500)],
     ]);
     expect(response.status.mock.calls).toEqual([[500]]);
     expect(response.json).toHaveBeenCalledTimes(1);
