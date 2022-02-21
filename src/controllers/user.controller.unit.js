@@ -47,6 +47,9 @@ describe("Controller: list", () => {
     expect(logger.error.mock.calls).toEqual([
       ["Ocorreu um erro ao listar usuários", new Error("500")],
     ]);
+    expect(response.status.mock.calls).toEqual([[500]]);
+    expect(response.json).toHaveBeenCalledTimes(1);
+    expect(response.json).toBeCalledWith({ message: "500" });
   });
 });
 
